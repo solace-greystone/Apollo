@@ -1,0 +1,8 @@
+{
+  "Author": "Solace Greystone",
+  "Name": "Apollo",
+  "Description": "Hands-free speech-to-text dictation using a locally run Whisper model. Use /apollo record to dictate; /apollo recordrp wraps the transcript as an /em says line.",
+  "Punchline": "Speak; it types.",
+  "RepoUrl": "https://github.com/solace-greystone/ApolloPluginDalamud",
+  "Tags": ["STT", "Whisper", "Dictation", "Voice"]
+}
