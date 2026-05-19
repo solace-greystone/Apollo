@@ -10,6 +10,7 @@ namespace Apollo {
         private MemoryStream _recordedAudioStream;
         private WaveFileWriter _waveWriter;
         private string _basePath;
+        private ModelDefinition _model;
         private string _modelName;
         private string _finalText;
         int _retry;
@@ -34,9 +35,10 @@ namespace Apollo {
         public bool IsRecording { get => _isRecording; set => _isRecording = value; }
         public bool IsModelReady => _isModelReady;
 
-        public SpeechToTextManager(string path) {
+        public SpeechToTextManager(string path, ModelDefinition? model = null) {
             _basePath = path;
-            _modelName = Path.Combine(path, "ggml-base.bin");
+            _model = model ?? ModelCatalog.Default;
+            _modelName = Path.Combine(path, _model.FileName);
             CheckForDependancies();
         }
         public async void CheckForDependancies() {
@@ -46,13 +48,13 @@ namespace Apollo {
                     return;
                 }
                 {
-                    using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(GgmlType.Base);
+                    using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(_model.GgmlType);
                     using var fileWriter = File.OpenWrite(_modelName);
 
                     long totalLength = 0;
                     try { totalLength = modelStream.Length; } catch { }
 
-                    Plugin.ChatGui.Print("Apollo: downloading Whisper model (~140 MB)...");
+                    Plugin.ChatGui.Print($"Apollo: downloading Whisper model {_model.DisplayName} (~{_model.ApproxSizeMb} MB)...");
 
                     var buffer = new byte[81920];
                     long totalRead = 0;
