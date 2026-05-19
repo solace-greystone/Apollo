@@ -33,30 +33,26 @@ public sealed class Plugin : IDalamudPlugin {
         _chat = new Chat.Chat(SigScanner);
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand) {
-            HelpMessage = "Whisper-based dictation. Subcommands: record | recordrp",
+            HelpMessage = "Whisper-based dictation. Subcommand: record",
         });
 
         Framework.Update += OnFrameworkUpdate;
         _sendThrottle.Start();
+
+        ChatGui.Print("Apollo: enabled. Type /apollo for usage.");
     }
 
     private void OnCommand(string command, string args) {
         var sub = (args ?? string.Empty).Trim().ToLowerInvariant();
         switch (sub) {
             case "record":
+                if (!_stt.IsModelReady) { ChatGui.Print("Apollo: Whisper model is still downloading; please wait."); return; }
                 if (_stt.IsRecording) { ChatGui.Print("Apollo: already recording."); return; }
-                _stt.RpMode = false;
                 _stt.RecordAudio();
                 ChatGui.Print("Apollo: recording... (stay silent ~1s to stop)");
                 break;
-            case "recordrp":
-                if (_stt.IsRecording) { ChatGui.Print("Apollo: already recording."); return; }
-                _stt.RpMode = true;
-                _stt.RecordAudio();
-                ChatGui.Print("Apollo: recording (RP)... (stay silent ~1s to stop)");
-                break;
             default:
-                ChatGui.Print("Apollo usage: /apollo record  |  /apollo recordrp");
+                ChatGui.Print("Apollo usage: /apollo record");
                 break;
         }
     }
@@ -66,10 +62,12 @@ public sealed class Plugin : IDalamudPlugin {
             ChatGui.Print("Apollo: (no transcript)");
             return;
         }
-        var line = _stt.RpMode ? $"/em says \"{text}\"" : text;
-        lock (_messageQueue) {
-            _messageQueue.Enqueue(line);
-        }
+
+        ChatGui.Print($"Apollo: {text}");
+        
+        //lock (_messageQueue) {
+        //    _messageQueue.Enqueue(text);
+        //}
     }
 
     private void OnFrameworkUpdate(IFramework framework) {

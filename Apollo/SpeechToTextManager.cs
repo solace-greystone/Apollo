@@ -14,11 +14,11 @@ namespace Apollo {
         private string _finalText;
         int _retry;
         private bool _isRecording;
-        private bool _rpMode;
+        private bool _isModelReady;
 
         public string FinalText { get => _finalText; set => _finalText = value; }
         public bool IsRecording { get => _isRecording; set => _isRecording = value; }
-        public bool RpMode { get => _rpMode; set => _rpMode = value; }
+        public bool IsModelReady => _isModelReady;
 
         public SpeechToTextManager(string path) {
             _basePath = path;
@@ -27,10 +27,40 @@ namespace Apollo {
         }
         public async void CheckForDependancies() {
             try {
-                if (!File.Exists(_modelName)) {
+                if (File.Exists(_modelName)) {
+                    _isModelReady = true;
+                    return;
+                }
+                {
                     using var modelStream = await WhisperGgmlDownloader.GetGgmlModelAsync(GgmlType.Base);
                     using var fileWriter = File.OpenWrite(_modelName);
-                    await modelStream.CopyToAsync(fileWriter);
+
+                    long totalLength = 0;
+                    try { totalLength = modelStream.Length; } catch { }
+
+                    Plugin.ChatGui.Print("Apollo: downloading Whisper model (~140 MB)...");
+
+                    var buffer = new byte[81920];
+                    long totalRead = 0;
+                    long lastReportedBytes = 0;
+                    const long reportEveryBytes = 10 * 1024 * 1024;
+                    int read;
+                    while ((read = await modelStream.ReadAsync(buffer, 0, buffer.Length)) > 0) {
+                        await fileWriter.WriteAsync(buffer, 0, read);
+                        totalRead += read;
+                        if (totalRead - lastReportedBytes >= reportEveryBytes) {
+                            lastReportedBytes = totalRead;
+                            if (totalLength > 0) {
+                                var pct = (int)(totalRead * 100 / totalLength);
+                                Plugin.ChatGui.Print($"Apollo: model download {pct}% ({totalRead / (1024 * 1024)} / {totalLength / (1024 * 1024)} MB)");
+                            } else {
+                                Plugin.ChatGui.Print($"Apollo: model download {totalRead / (1024 * 1024)} MB");
+                            }
+                        }
+                    }
+
+                    Plugin.ChatGui.Print("Apollo: model download complete.");
+                    _isModelReady = true;
                 }
             } catch {
 
