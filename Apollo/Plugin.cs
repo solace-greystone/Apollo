@@ -49,7 +49,7 @@ public sealed class Plugin : IDalamudPlugin {
                 if (!_stt.IsModelReady) { ChatGui.Print("Apollo: Whisper model is still downloading; please wait."); return; }
                 if (_stt.IsRecording) { ChatGui.Print("Apollo: already recording."); return; }
                 _stt.RecordAudio();
-                ChatGui.Print("Apollo: recording... (stay silent ~1s to stop)");
+                ChatGui.Print("Apollo: recording... (stay silent to stop)");
                 break;
             default:
                 ChatGui.Print("Apollo usage: /apollo record");
