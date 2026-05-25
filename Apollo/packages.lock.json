@@ -28,6 +28,12 @@
           "NAudio.WinMM": "2.2.1"
         }
       },
+      "System.Speech": {
+        "type": "Direct",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "z8mvEVBfWSi0692vPOra8MougSEJCDzlaLj4g0aA87XDZpJoJD3BJTcJ0MuFbbN1fOT9Cr2ZFqXhZc+zzX0Gwg=="
+      },
       "Whisper.net": {
         "type": "Direct",
         "requested": "[1.5.0, )",
