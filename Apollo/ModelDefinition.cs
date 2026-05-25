@@ -25,7 +25,7 @@ namespace Apollo {
         public static readonly ModelDefinition MediumEn = new(
             GgmlType.MediumEn, "ggml-medium.en.bin", "Medium (English)", 1500);
 
-        public static readonly ModelDefinition Default = SmallEn;
+        public static readonly ModelDefinition Default = MediumEn;
 
         public static readonly ModelDefinition[] All = { BaseEn, SmallEn, MediumEn };
     }
