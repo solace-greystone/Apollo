@@ -20,6 +20,22 @@ internal sealed class ConfigWindow : Window {
     }
 
     public override void Draw() {
+        if (!ImGui.BeginTabBar("apollo-settings-tabs")) return;
+
+        if (ImGui.BeginTabItem("Speech-to-Text")) {
+            DrawSttTab();
+            ImGui.EndTabItem();
+        }
+
+        if (ImGui.BeginTabItem("Text-to-Speech")) {
+            DrawTtsTab();
+            ImGui.EndTabItem();
+        }
+
+        ImGui.EndTabBar();
+    }
+
+    private void DrawSttTab() {
         var sendToChat = _config.SendTranscriptToChat;
         if (ImGui.Checkbox("Send transcript to in-game chat", ref sendToChat)) {
             _config.SendTranscriptToChat = sendToChat;
@@ -46,15 +62,10 @@ internal sealed class ConfigWindow : Window {
         ImGui.TextDisabled("Cuts the audio shortly after the last detected speech.\nDisable if transcripts are getting truncated.");
 
         ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
         ImGui.TextDisabled($"Active model: {ModelCatalog.Default.DisplayName}");
+    }
 
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-        ImGui.Text("Text-to-Speech");
-
+    private void DrawTtsTab() {
         var ttsAvailable = _tts.IsAvailable;
         if (!ttsAvailable) ImGui.BeginDisabled();
         var enableTts = _config.EnableTts;
