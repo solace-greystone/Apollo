@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Download Dalamud
+        run: |
+          mkdir -p ~/.xlcore/dalamud/Hooks/dev
+          curl -sSL https://goatcorp.github.io/dalamud-distrib/latest.zip -o /tmp/dalamud.zip
+          unzip -oq /tmp/dalamud.zip -d ~/.xlcore/dalamud/Hooks/dev
+
+      - name: Determine version
+        id: version
+        run: echo "ver=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      # DalamudPackager (bundled with Dalamud.NET.Sdk) writes the plugin zip to
+      # Apollo/bin/Release/Apollo/latest.zip on a Release build. -p:Version stamps
+      # the manifest's AssemblyVersion from the git tag.
+      - name: Build
+        run: dotnet build -c Release -p:Version=${{ steps.version.outputs.ver }}
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          name: Apollo ${{ github.ref_name }}
+          tag: ${{ github.ref_name }}
+          artifacts: "Apollo/bin/Release/Apollo/latest.zip"
+          body: "Install via the Dalamud custom plugin repository, not manually."
+          allowUpdates: true
+          replacesArtifacts: true
+
+      - name: Update repo.json on main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          ver="${GITHUB_REF_NAME#v}"
+          url="https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/latest.zip"
+          jq --arg v "$ver" --arg url "$url" '
+            .[0].AssemblyVersion = $v
+            | .[0].TestingAssemblyVersion = $v
+            | .[0].DownloadLinkInstall = $url
+            | .[0].DownloadLinkTesting = $url
+            | .[0].DownloadLinkUpdate = $url
+          ' repo.json > repo.json.tmp && mv repo.json.tmp repo.json
+          git add repo.json
+          git commit -m "[CI] Update repo.json for ${GITHUB_REF_NAME}" || exit 0
+          git push origin main
