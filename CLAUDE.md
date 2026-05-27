@@ -12,7 +12,7 @@ Requires .NET 10 SDK. Built against `Dalamud.NET.Sdk/15.0.0`; TFM is `net10.0-wi
 
 For in-game testing on Windows, point Dalamud → Settings → Experimental → Dev Plugin Locations at the build output directory.
 
-There is no test suite and no linter config. CI is `.github/workflows/dotnet.yml`: a Release build on `ubuntu-latest` for pushes/PRs to `main` (no Dalamud download step — the `Dalamud.NET.Sdk` resolves references from NuGet). There is no release/publish pipeline yet.
+There is no test suite and no linter config. CI is `.github/workflows/dotnet.yml`: a Release build on `ubuntu-latest` for pushes/PRs to `main`. The `Dalamud.NET.Sdk` requires an actual Dalamud install present at build time (not just NuGet refs), so the workflow downloads `dalamud-distrib/latest.zip` into `~/.xlcore/dalamud/Hooks/dev/` (the Linux dev-plugin path the SDK checks) before building. Locally this path is populated by your XIVLauncher/XLCore install. There is no release/publish pipeline yet.
 
 ## Architecture
 
