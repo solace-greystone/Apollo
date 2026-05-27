@@ -1,0 +1,23 @@
+[
+  {
+    "Author": "Solace Greystone",
+    "Name": "Apollo Accessibility",
+    "InternalName": "Apollo",
+    "AssemblyVersion": "0.1.0.0",
+    "TestingAssemblyVersion": "0.1.0.0",
+    "Description": "Speech-to-text and text-to-speech functionality.",
+    "Punchline": "Making Final Fantasy more accessible to everyone.",
+    "Tags": ["STT", "TTS", "Dictation", "Voice"],
+    "RepoUrl": "https://github.com/solace-greystone/ApolloPluginDalamud",
+    "ApplicableVersion": "any",
+    "DalamudApiLevel": 15,
+    "IsHide": false,
+    "IsTestingExclusive": false,
+    "DownloadCount": 0,
+    "LastUpdate": 0,
+    "DownloadLinkInstall": "https://github.com/solace-greystone/ApolloPluginDalamud/releases/download/0.1.0.0/latest.zip",
+    "DownloadLinkTesting": "https://github.com/solace-greystone/ApolloPluginDalamud/releases/download/0.1.0.0/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/solace-greystone/ApolloPluginDalamud/releases/download/0.1.0.0/latest.zip",
+    "IconUrl": "https://raw.githubusercontent.com/solace-greystone/ApolloPluginDalamud/main/images/icon.png"
+  }
+]

@@ -26,8 +26,9 @@ Known issues carried over from the source plugin or introduced by the extraction
 
 ## Plugin plumbing
 
-- [x] **CI.** ~~No GitHub Actions workflow yet~~ — `.github/workflows/dotnet.yml` builds Release on `ubuntu-latest` for pushes/PRs to `main`. The `Dalamud.NET.Sdk` needs a real Dalamud install at build time, so the workflow downloads `dalamud-distrib/latest.zip` into `~/.xlcore/dalamud/Hooks/dev/` first. No release/`repo.json` pipeline yet.
-- [ ] **Manifest icon.** `Apollo.json` has no `IconUrl`. Dalamud will show a placeholder.
+- [x] **CI.** ~~No GitHub Actions workflow yet~~ — `.github/workflows/dotnet.yml` builds Release on `ubuntu-latest` for pushes/PRs to `main`. The `Dalamud.NET.Sdk` needs a real Dalamud install at build time, so the workflow downloads `dalamud-distrib/latest.zip` into `~/.xlcore/dalamud/Hooks/dev/` first.
+- [x] **Release pipeline.** ~~No release/`repo.json` pipeline~~ — `repo.json` (Dalamud custom-repo manifest) lives at repo root, and `.github/workflows/release.yml` (on tag push) builds with the tag as version, publishes DalamudPackager's `latest.zip` as a GitHub release, and commits the bumped `repo.json` back to `main`. Caveat: the release zip relies on the CI runner being clean — locally the runtime-downloaded `ggml-*.bin` models live in the build output and would bloat a hand-built package. If we ever package outside clean CI, exclude them.
+- [ ] **Manifest icon.** Neither `Apollo.json` nor `repo.json` points at a real icon — `repo.json` references `images/icon.png`, which doesn't exist yet (Dalamud shows a placeholder). Add the icon and an `IconUrl` to `Apollo.json`.
 
 ## TTS (experimental)
 

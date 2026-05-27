@@ -12,7 +12,7 @@ Requires .NET 10 SDK. Built against `Dalamud.NET.Sdk/15.0.0`; TFM is `net10.0-wi
 
 For in-game testing on Windows, point Dalamud → Settings → Experimental → Dev Plugin Locations at the build output directory.
 
-There is no test suite and no linter config. CI is `.github/workflows/dotnet.yml`: a Release build on `ubuntu-latest` for pushes/PRs to `main`. The `Dalamud.NET.Sdk` requires an actual Dalamud install present at build time (not just NuGet refs), so the workflow downloads `dalamud-distrib/latest.zip` into `~/.xlcore/dalamud/Hooks/dev/` (the Linux dev-plugin path the SDK checks) before building. Locally this path is populated by your XIVLauncher/XLCore install. There is no release/publish pipeline yet.
+There is no test suite and no linter config. CI is `.github/workflows/dotnet.yml`: a Release build on `ubuntu-latest` for pushes/PRs to `main`. The `Dalamud.NET.Sdk` requires an actual Dalamud install present at build time (not just NuGet refs), so the workflow downloads `dalamud-distrib/latest.zip` into `~/.xlcore/dalamud/Hooks/dev/` (the Linux dev-plugin path the SDK checks) before building. Locally this path is populated by your XIVLauncher/XLCore install. Releases are tag-driven: `.github/workflows/release.yml` (on tag push) builds with the tag as version, publishes DalamudPackager's `Apollo/bin/Release/Apollo/latest.zip` as a GitHub release, and commits the version-bumped `repo.json` (the Dalamud custom-repo manifest at repo root) back to `main`. Note: the runtime-downloaded `ggml-*.bin` models land in the build output dir, so DalamudPackager's zip is only lean on a clean runner — don't hand-cut a release from a dev machine without excluding them.
 
 ## Architecture
 
