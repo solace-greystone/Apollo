@@ -26,7 +26,7 @@ Known issues carried over from the source plugin or introduced by the extraction
 
 ## Plugin plumbing
 
-- [ ] **CI.** No GitHub Actions workflow yet — Linux build is verified locally only.
+- [x] **CI.** ~~No GitHub Actions workflow yet~~ — `.github/workflows/dotnet.yml` builds Release on `ubuntu-latest` for pushes/PRs to `main` (no Dalamud download needed; the SDK resolves refs from NuGet). No release/`repo.json` pipeline yet.
 - [ ] **Manifest icon.** `Apollo.json` has no `IconUrl`. Dalamud will show a placeholder.
 
 ## TTS (experimental)

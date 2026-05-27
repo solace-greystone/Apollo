@@ -12,7 +12,7 @@ Requires .NET 10 SDK. Built against `Dalamud.NET.Sdk/15.0.0`; TFM is `net10.0-wi
 
 For in-game testing on Windows, point Dalamud → Settings → Experimental → Dev Plugin Locations at the build output directory.
 
-There is no test suite, no linter config, and no CI workflow yet.
+There is no test suite and no linter config. CI is `.github/workflows/dotnet.yml`: a Release build on `ubuntu-latest` for pushes/PRs to `main` (no Dalamud download step — the `Dalamud.NET.Sdk` resolves references from NuGet). There is no release/publish pipeline yet.
 
 ## Architecture
 
