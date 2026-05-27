@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Apollo.Tts;
 using Apollo.Windows;
+using Dalamud.Game.Chat;
 using Dalamud.Game.Command;
+using Dalamud.Game.Text;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -24,6 +27,7 @@ public sealed class Plugin : IDalamudPlugin {
 
     private readonly SpeechToTextManager _stt;
     private readonly Chat.Chat _chat;
+    private readonly TextToSpeechManager _tts;
     private readonly Queue<string> _messageQueue = new();
     private readonly Stopwatch _sendThrottle = new();
     private readonly WindowSystem _windowSystem = new("Apollo");
@@ -38,13 +42,15 @@ public sealed class Plugin : IDalamudPlugin {
         _stt.RecordingFinished += OnRecordingFinished;
 
         _chat = new Chat.Chat(SigScanner);
+        _tts = new TextToSpeechManager(_config);
+        ChatGui.ChatMessage += OnChatMessage;
 
         CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand) {
             HelpMessage = "Whisper-based dictation. Subcommand: record",
         });
 
         _mainWindow = new MainWindow(_stt);
-        _configWindow = new ConfigWindow(_config);
+        _configWindow = new ConfigWindow(_config, _tts);
         _windowSystem.AddWindow(_mainWindow);
         _windowSystem.AddWindow(_configWindow);
 
@@ -111,7 +117,41 @@ public sealed class Plugin : IDalamudPlugin {
         _sendThrottle.Restart();
     }
 
+    private void OnChatMessage(IHandleableChatMessage message) {
+        if (!_config.EnableTts) return;
+        if (!IsChannelEnabled(message.LogKind)) return;
+
+        var senderText = (message.Sender?.TextValue ?? string.Empty).Trim();
+        var bodyText = (message.Message?.TextValue ?? string.Empty).Trim();
+        if (bodyText.Length == 0) return;
+
+        var spoken = senderText.Length > 0
+            ? $"{senderText} says: {bodyText}"
+            : bodyText;
+        _tts.Enqueue(spoken);
+    }
+
+    private bool IsChannelEnabled(XivChatType type) => type switch {
+        XivChatType.Say => _config.TtsSpeakSay,
+        XivChatType.Yell => _config.TtsSpeakYell,
+        XivChatType.Shout => _config.TtsSpeakShout,
+        XivChatType.Party or XivChatType.CrossParty => _config.TtsSpeakParty,
+        XivChatType.Alliance => _config.TtsSpeakAlliance,
+        XivChatType.FreeCompany => _config.TtsSpeakFreeCompany,
+        XivChatType.TellIncoming => _config.TtsSpeakTellIncoming,
+        XivChatType.Ls1 or XivChatType.Ls2 or XivChatType.Ls3 or XivChatType.Ls4
+            or XivChatType.Ls5 or XivChatType.Ls6 or XivChatType.Ls7 or XivChatType.Ls8
+            => _config.TtsSpeakLinkShell,
+        XivChatType.CrossLinkShell1 or XivChatType.CrossLinkShell2 or XivChatType.CrossLinkShell3
+            or XivChatType.CrossLinkShell4 or XivChatType.CrossLinkShell5 or XivChatType.CrossLinkShell6
+            or XivChatType.CrossLinkShell7 or XivChatType.CrossLinkShell8
+            => _config.TtsSpeakCrossLinkShell,
+        XivChatType.NoviceNetwork => _config.TtsSpeakNoviceNetwork,
+        _ => false,
+    };
+
     public void Dispose() {
+        ChatGui.ChatMessage -= OnChatMessage;
         PluginInterface.UiBuilder.Draw -= OnDraw;
         PluginInterface.UiBuilder.OpenMainUi -= OnOpenMainUi;
         PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
@@ -120,5 +160,6 @@ public sealed class Plugin : IDalamudPlugin {
         CommandManager.RemoveHandler(CommandName);
         _stt.RecordingFinished -= OnRecordingFinished;
         _stt.Dispose();
+        _tts.Dispose();
     }
 }

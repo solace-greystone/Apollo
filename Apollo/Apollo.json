@@ -1,8 +1,8 @@
 {
   "Author": "Solace Greystone",
-  "Name": "Apollo",
-  "Description": "Hands-free speech-to-text dictation using a locally run Whisper model. Use /apollo record to dictate.",
-  "Punchline": "Speak; it types.",
+  "Name": "Apollo Accessibility",
+  "Description": "Speech-to-text and text-to-speech functionality.",
+  "Punchline": "Making Final Fantasy more accessible to everyone.",
   "RepoUrl": "https://github.com/solace-greystone/ApolloPluginDalamud",
-  "Tags": ["STT", "Whisper", "Dictation", "Voice"]
+  "Tags": ["STT", "TTS", "Dictation", "Voice"]
 }
