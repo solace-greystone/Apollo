@@ -26,9 +26,6 @@ Known issues carried over from the source plugin or introduced by the extraction
 
 ## Plugin plumbing
 
-- [ ] **Field naming.** `_messageQueue`, `_sendThrottle`, and `SpeechToTextManager`'s private fields are inherited verbatim from the source — fine, but inconsistent with .NET style if we ever lint.
-- [ ] **Nullability warnings.** Inherited nullability warnings from `SpeechToTextManager.cs`. Annotate properly or suppress. (Newer files — `Configuration`, `ModelDefinition`, `Tts/*`, `Windows/*` — are clean; keep them that way.)
-- [ ] **Unused field.** `SpeechToTextManager._retry` (`:17`) is declared and never used.
 - [ ] **CI.** No GitHub Actions workflow yet — Linux build is verified locally only.
 - [ ] **Manifest icon.** `Apollo.json` has no `IconUrl`. Dalamud will show a placeholder.
 

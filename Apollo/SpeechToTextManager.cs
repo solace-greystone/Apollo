@@ -5,16 +5,15 @@ using Whisper.net.Ggml;
 
 namespace Apollo {
     public class SpeechToTextManager {
-        private Stopwatch _timer = new Stopwatch();
-        private WaveInEvent _waveSource;
-        private MemoryStream _recordedAudioStream;
-        private WaveFileWriter _waveWriter;
-        private string _basePath;
-        private ModelDefinition _model;
-        private Configuration _config;
-        private string _modelName;
-        private string _finalText;
-        int _retry;
+        private readonly Stopwatch _timer = new Stopwatch();
+        private WaveInEvent? _waveSource;
+        private MemoryStream? _recordedAudioStream;
+        private WaveFileWriter? _waveWriter;
+        private readonly string _basePath;
+        private readonly ModelDefinition _model;
+        private readonly Configuration _config;
+        private readonly string _modelName;
+        private string _finalText = "";
         private bool _isRecording;
         private bool _isModelReady;
         private WhisperFactory? _whisperFactory;
@@ -95,7 +94,7 @@ namespace Apollo {
                 _isModelReady = false;
             }
         }
-        public event EventHandler<string> RecordingFinished;
+        public event EventHandler<string>? RecordingFinished;
 
         public void RecordAudio() {
             _waveSource = new WaveInEvent {
@@ -117,7 +116,7 @@ namespace Apollo {
             _isRecording = true;
         }
 
-        private void DataAvailable(object sender, WaveInEventArgs e) {
+        private void DataAvailable(object? sender, WaveInEventArgs e) {
             if (_waveWriter == null) return;
             _waveWriter.Write(e.Buffer, 0, e.BytesRecorded);
 
@@ -176,31 +175,38 @@ namespace Apollo {
         }
 
         public async void StopRecording() {
-            _waveSource?.StopRecording();
-            _waveSource.DataAvailable -= DataAvailable;
-            _waveSource.RecordingStopped -= RecordingStopped;
+            var waveSource = _waveSource;
+            var recordedStream = _recordedAudioStream;
+            if (waveSource == null || recordedStream == null) {
+                _isRecording = false;
+                return;
+            }
 
-            var format = _waveSource?.WaveFormat;
+            waveSource.StopRecording();
+            waveSource.DataAvailable -= DataAvailable;
+            waveSource.RecordingStopped -= RecordingStopped;
+
+            var format = waveSource.WaveFormat;
             var lastSpeechOffset = _lastSpeechByteOffset;
 
             try { _waveWriter?.Flush(); } catch { }
             try { _waveWriter?.Dispose(); } catch { }
-            try { _waveSource?.Dispose(); } catch { }
+            try { waveSource.Dispose(); } catch { }
 
             // _waveWriter.Dispose() above also closed _recordedAudioStream; rebuild
             // a fresh MemoryStream from its buffer (ToArray works post-dispose).
             MemoryStream audioForWhisper;
             try {
-                var wav = _recordedAudioStream.ToArray();
+                var wav = recordedStream.ToArray();
                 byte[]? trimmed = null;
-                if (format != null && _config.TrimTrailingSilenceEnabled) {
+                if (_config.TrimTrailingSilenceEnabled) {
                     try {
                         trimmed = TrimTrailingSilence(wav, lastSpeechOffset, format);
                     } catch (Exception ex) {
                         Plugin.ChatGui.Print($"Apollo: silence-trim failed, using untrimmed audio: {ex.GetType().Name}: {ex.Message}");
                     }
                 }
-                _recordedAudioStream.Dispose();
+                recordedStream.Dispose();
                 _recordedAudioStream = new MemoryStream(trimmed ?? wav);
                 audioForWhisper = _recordedAudioStream;
             } catch (Exception ex) {
@@ -309,7 +315,7 @@ namespace Apollo {
             return result;
         }
 
-        private void RecordingStopped(object sender, StoppedEventArgs e) {
+        private void RecordingStopped(object? sender, StoppedEventArgs e) {
 
         }
     }

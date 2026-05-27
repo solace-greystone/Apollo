@@ -42,6 +42,5 @@ TTS flow: `ChatGui.ChatMessage` → channel filter → format → `TextToSpeechM
 ## Conventions
 
 - C# `LangVersion` is pinned to 11.0 even though TFM is `net10.0-windows7.0`. Don't bump it casually — it's intentional for Dalamud SDK compatibility.
-- Nullable is enabled; `SpeechToTextManager.cs` carries inherited nullability warnings that are knowingly unfixed (see TODO.md). New files (`Configuration`, `ModelDefinition`, `Tts/*`, `Windows/*`) are written nullable-clean — keep them that way.
-- Private fields and naming in `SpeechToTextManager.cs` and `Chat/Chat.cs` are inherited verbatim from upstream (RoleplayingVoiceDalamud / XivCommon) — preserve that style when patching those files so future merges from upstream stay clean. The newer files follow ordinary .NET style.
+- Nullable is enabled and the build is warning-clean (0 warnings) — keep it that way.
 - `WhisperFactory.FromPath` is given a hardcoded Windows runtime path (`{basePath}\runtimes\win-x64\whisper.dll`); this only matters at runtime on Windows, not for the Linux cross-build.
